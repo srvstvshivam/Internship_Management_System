@@ -1,0 +1,58 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '4.0.2'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.internshipmanagementsystem'
+version = '0.0.1-SNAPSHOT'
+description = 'Demo project for Spring Boot'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+		// Database: MongoDB Atlas Connection
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    
+	// Web: For Registration/Login APIs
+	implementation 'org.springframework.boot:spring-boot-starter-web' 
+    
+	// Security: For Password Hashing & Authentication
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+    
+    // Validation: Crucial for checking Roll No, Email, and CGPA on Registration
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// Utilities: To reduce boilerplate code (Getters/Setters)
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	
+	// Cloudinary for file uploads
+    implementation 'com.cloudinary:cloudinary-http5:2.0.0'
+    
+    // Optional: Commons IO to help with file stream handling
+    implementation 'commons-io:commons-io:2.11.0'
+
+	// Testing
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
