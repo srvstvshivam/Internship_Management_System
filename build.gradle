@@ -25,33 +25,39 @@ repositories {
 }
 
 dependencies {
-		// Database: MongoDB Atlas Connection
-	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
-    
-	// Web: For Registration/Login APIs
-	implementation 'org.springframework.boot:spring-boot-starter-web' 
-    
-	// Security: For Password Hashing & Authentication
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-    
-    // Validation: Crucial for checking Roll No, Email, and CGPA on Registration
+
+    // 🌐 WEB
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // 🗄 JPA + POSTGRESQL
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // 🔐 SECURITY
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // ✅ VALIDATION
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-	// Utilities: To reduce boilerplate code (Getters/Setters)
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	
-	// Cloudinary for file uploads
-    implementation 'com.cloudinary:cloudinary-http5:2.0.0'
-    
-    // Optional: Commons IO to help with file stream handling
-    implementation 'commons-io:commons-io:2.11.0'
+    // 📧 MAIL (Optional - for OTP)
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 
-	// Testing
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // ☁️ CLOUDINARY (Optional)
+    implementation 'com.cloudinary:cloudinary-http5:2.0.0'
+
+    // 🛠 LOMBOK
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+    // 🧪 TEST
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
 }
+
 
 tasks.named('test') {
 	useJUnitPlatform()
