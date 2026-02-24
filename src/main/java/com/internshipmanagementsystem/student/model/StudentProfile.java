@@ -19,7 +19,7 @@ public class StudentProfile {
 
     private String resumeUrl;
 
-    private String skills; 
+    private String skills;//arr 
 
     private String linkedinUrl;
     private String githubUrl;

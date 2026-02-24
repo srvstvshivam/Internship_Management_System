@@ -6,8 +6,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import com.internshipmanagementsystem.student.model.enums.Role;
-
-
+import com.internshipmanagementsystem.student.model.enums.StudentStatus;
+import com.internshipmanagementsystem.student.model.enums.Gender;
 
 @Entity
 @Table(name = "students")
@@ -32,20 +32,23 @@ public class Student {
 
     private LocalDate dob;
 
-    private String gender;
+    @Embedded
+    private Gender gender;
 
     private String profileImageUrl;
 
     private Boolean profileCompleted = false;
     @Enumerated(EnumType.STRING)
     private Role role;
-
+    
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-
     @Embedded
     private Address address;
+
+    @Enumerated(EnumType.STRING)
+    private StudentStatus status;
 
     // Relations
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
@@ -56,4 +59,6 @@ public class Student {
 
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL)
     private StudentProfile profile;
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WorkExperience> workExperiences;
 }
