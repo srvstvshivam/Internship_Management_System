@@ -1,4 +1,4 @@
-package com.internshipmanagementsystem.student.config;
+package com.internshipmanagementsystem.config;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;

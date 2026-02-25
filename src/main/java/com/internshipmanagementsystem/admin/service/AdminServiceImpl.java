@@ -3,15 +3,17 @@ package com.internshipmanagementsystem.admin.service;
 
 import com.internshipmanagementsystem.admin.dtos.AdminResponse;
 import com.internshipmanagementsystem.admin.dtos.LoginRequest;
-import com.internshipmanagementsystem.admin.configuration.AdminJwtUtil;
+import com.internshipmanagementsystem.config.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+
 
 @Service
 public class AdminServiceImpl implements AdminService {
 
     @Autowired
-    private AdminJwtUtil jwtUtil;
+    private JwtUtil jwtUtil;
 
     @Override
     public AdminResponse login(LoginRequest request) {

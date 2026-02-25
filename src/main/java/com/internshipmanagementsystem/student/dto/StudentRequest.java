@@ -9,24 +9,27 @@ import java.time.LocalDate;
 @Data
 public class StudentRequest {
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    @NotBlank
+    @Email
     private String email;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, message = "Password must be at least 6 characters")
+    @Pattern(
+    regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).{8,}$",
+    message = "Password must contain 8 characters, 1 uppercase, 1 lowercase, 1 digit and 1 special character")
+    @NotBlank
     private String password;
+    
 
-    @NotBlank(message = "First name is required")
+    @NotBlank
     private String firstName;
 
     private String middleName;
 
-    @NotBlank(message = "Last name is required")
+    @NotBlank
     private String lastName;
 
     private LocalDate dob;
 
-    @NotNull(message = "Gender is required")
+    @NotNull
     private Gender gender;
 }
