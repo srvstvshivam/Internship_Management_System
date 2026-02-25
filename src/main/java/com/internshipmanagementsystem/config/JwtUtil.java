@@ -1,4 +1,4 @@
-package com.internshipmanagementsystem.student.config;
+package com.internshipmanagementsystem.config;
 
 
 import org.springframework.stereotype.Component;
@@ -11,14 +11,16 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final String SECRET = "your_super_secret_key_which_should_be_long";
-    private final long EXPIRATION = 1000 * 60 * 60;
+    private final String SECRET = "MTY0ODg0NDM4NjY3OTQyOTQ2ODc1NjMxNDYyMzQ1Njc4OTA3NjU0MzIxMDk4NzY1";
+    private final long EXPIRATION = 1000*60*60;
+    
 
+    //Create a proper HMAC SHA key from these bytes.
     private Key getSignKey() {
         return Keys.hmacShaKeyFor(SECRET.getBytes());
     }
 
-    // Generate Token with role
+    //Generate Token with role
     public String generateToken(String email, String role) {
         return Jwts.builder()
                 .setSubject(email)
@@ -34,16 +36,16 @@ public class JwtUtil {
         return extractAllClaims(token).getSubject();
     }
 
-    // Extract Role
+    //Extract Role
     public String extractRole(String token) {
         return extractAllClaims(token).get("role", String.class);
     }
 
-    // Extract All Claims
+    //Extract All Claims
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignKey())
-                .build()
+                .build() //Builds the parser object.
                 .parseClaimsJws(token)
                 .getBody();
     }

@@ -32,7 +32,7 @@ public class Student {
 
     private LocalDate dob;
 
-    @Embedded
+   @Enumerated(EnumType.STRING)
     private Gender gender;
 
     private String profileImageUrl;
@@ -57,7 +57,7 @@ public class Student {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Project> projects;
 
-    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL,  fetch = FetchType.LAZY)
     private StudentProfile profile;
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkExperience> workExperiences;

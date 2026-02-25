@@ -1,4 +1,4 @@
-package com.internshipmanagementsystem.student.config;
+package com.internshipmanagementsystem.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -1,7 +1,7 @@
 package com.internshipmanagementsystem.student.model.enums;
 
 public enum Gender {
-   MALE,
+MALE,
 FEMALE,
 NON_BINARY,
 TRANSGENDER,
