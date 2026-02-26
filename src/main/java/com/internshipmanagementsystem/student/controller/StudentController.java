@@ -21,9 +21,7 @@ public class StudentController {
 
     // Register a new student
     @PostMapping(value = "/register", consumes = "multipart/form-data")
-    public ResponseEntity<StudentResponse> register(
-            @ModelAttribute @Valid StudentRequest request,
-            @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) {
+    public ResponseEntity<StudentResponse> register( @ModelAttribute @Valid StudentRequest request,@RequestParam(value = "profileImage", required = false) MultipartFile profileImage) {
 
         StudentResponse response = studentService.registerStudent(request, profileImage);
 
