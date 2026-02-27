@@ -29,6 +29,9 @@ public class StudentRequest {
     private String lastName;
 
     private LocalDate dob;
+    
+    @NotBlank
+    private String mobileNumber;
 
     @NotNull
     private Gender gender;
