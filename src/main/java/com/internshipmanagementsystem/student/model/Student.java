@@ -23,8 +23,9 @@ public class Student {
 
     @Column(unique = true, nullable = false)
     private String email;
-
-    private String password;
+@Column(nullable = false)
+private String password;
+   
 
     private String firstName;
     private String middleName;
@@ -36,20 +37,35 @@ public class Student {
     private Gender gender;
 
     private String profileImageUrl;
+    
+  @Column(unique = true)
+private String enrollmentNumber;
 
-    private Boolean profileCompleted = false;
+    @Column(unique = true)
+    private String mobileNumber;
+
     @Enumerated(EnumType.STRING)
     private Role role;
     
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
     @Embedded
     private Address address;
 
-    @Enumerated(EnumType.STRING)
-    private StudentStatus status;
+ @Builder.Default
+@Enumerated(EnumType.STRING)
+private StudentStatus status = StudentStatus.ACTIVE;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
+@PrePersist
+protected void onCreate() {
+    createdAt = LocalDateTime.now();
+    updatedAt = LocalDateTime.now();
+}
+
+@PreUpdate
+protected void onUpdate() {
+    updatedAt = LocalDateTime.now();
+}
     // Relations
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Education> educations;

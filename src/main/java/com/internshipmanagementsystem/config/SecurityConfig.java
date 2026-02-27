@@ -40,7 +40,8 @@ public class SecurityConfig {
                         "/api/students/login",
                         "/api/admin/login",
                         "/api/mentors/login",
-                        "/api/coordinators/login"
+                        "/api/coordinators/login",
+                         "/api/auth/**"
                 ).permitAll()
 
                 // 🔐 Role Based Protection

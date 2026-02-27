@@ -20,16 +20,14 @@ public class StudentController {
     private final StudentService studentService;
 
     // Register a new student
-    @PostMapping(value = "/register", consumes = "multipart/form-data")
-    public ResponseEntity<StudentResponse> register( @ModelAttribute @Valid StudentRequest request,@RequestParam(value = "profileImage", required = false) MultipartFile profileImage) {
+   @PostMapping("/register")
+public ResponseEntity<StudentResponse> register(
+        @RequestBody @Valid StudentRequest request) {
 
-        StudentResponse response = studentService.registerStudent(request, profileImage);
+    StudentResponse response = studentService.registerStudent(request);
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
-    }
-
+    return ResponseEntity.status(HttpStatus.CREATED).body(response);
+}
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody LoginRequest request) {
