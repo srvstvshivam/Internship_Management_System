@@ -156,7 +156,7 @@ mvn clean install
 mvn spring-boot:run
 
 Backend runs on:
-http://localhost:8080
+http://localhost:8082
 
 Ensure PostgreSQL is installed and running.
 Configure database credentials in application.properties:
