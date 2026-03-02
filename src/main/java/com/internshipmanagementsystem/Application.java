@@ -3,7 +3,12 @@ package com.internshipmanagementsystem;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+
+@SpringBootApplication(scanBasePackages = {
+	"com.internshipmanagementsystem.admin",
+	"com.internshipmanagementsystem.config"
+})
+// @SpringBootApplication
 public class Application {
 
 	public static void main(String[] args) {

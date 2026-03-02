@@ -12,43 +12,49 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import java.util.List;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
-public class JwtFilter extends OncePerRequestFilter { 
-     @Autowired
+public class JwtFilter extends OncePerRequestFilter {
+
+    @Autowired
     private JwtUtil jwtUtil;
-@Override
-protected void doFilterInternal(
-        HttpServletRequest request,
-        HttpServletResponse response,
-        FilterChain filterChain
-) throws ServletException, IOException {
 
-    String authHeader = request.getHeader("Authorization");
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
-    if (authHeader != null && authHeader.startsWith("Bearer ")) {
+        String authHeader = request.getHeader("Authorization");
 
-        String token = authHeader.substring(7);
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
 
-        if (jwtUtil.validateToken(token)) {
+            String token = authHeader.substring(7);
 
-            String email = jwtUtil.extractEmail(token);
-            String role = jwtUtil.extractRole(token);
+            if (jwtUtil.validateToken(token)) {
 
-            List<GrantedAuthority> authorities =
-                    List.of(new SimpleGrantedAuthority("ROLE_" + role));
+                String email = jwtUtil.extractEmail(token);
+                String role = jwtUtil.extractRole(token);
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(email, null, authorities);
+                // 🔥 FIX: Ensure role always starts with ROLE_
+                if (role != null && !role.startsWith("ROLE_")) {
+                    role = "ROLE_" + role;
+                }
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                List<GrantedAuthority> authorities =
+                        List.of(new SimpleGrantedAuthority(role));
+
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(email, null, authorities);
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
         }
-    }
 
-    filterChain.doFilter(request, response);
-}
-    
+        filterChain.doFilter(request, response);
+    }
 }
