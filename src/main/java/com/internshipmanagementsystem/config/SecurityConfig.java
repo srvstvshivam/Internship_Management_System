@@ -31,27 +31,32 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session ->
                     session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .authorizeHttpRequests(auth -> auth
+            ).authorizeHttpRequests(auth -> auth
 
-                // 🔓 Public APIs
-                .requestMatchers(
-                        "/api/students/register",
-                        "/api/students/login",
-                        "/api/admin/login",
-                        "/api/mentors/login",
-                        "/api/coordinators/login",
-                         "/api/auth/**"
-                ).permitAll()
+    //  Public APIs
+    .requestMatchers(
+            "/api/students/register",
+            "/api/students/login",
+            "/api/admin/login",
+            "/api/mentors/login",
+            "/api/coordinators/login",
+            "/api/auth/**"
+    ).permitAll()
 
-                // 🔐 Role Based Protection
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/coordinators/**").hasRole("COORDINATOR")
-                .requestMatchers("/api/mentors/**").hasRole("MENTOR")
-                .requestMatchers("/api/students/**").hasRole("STUDENT")
+    //  Admin / Mentor / Coordinator
+    .requestMatchers("/api/admin/**").hasRole("ADMIN")
+    .requestMatchers("/api/coordinators/**").hasRole("COORDINATOR")
+    .requestMatchers("/api/mentors/**").hasRole("MENTOR")
 
-                .anyRequest().authenticated()
-            )
+    //  Student APIs (ONLY protected ones)
+    .requestMatchers(
+            "/api/students/profile/**",
+            "/api/students/update/**",
+            "/api/students/apply/**"
+    ).hasRole("STUDENT")
+
+    .anyRequest().authenticated()
+)
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
