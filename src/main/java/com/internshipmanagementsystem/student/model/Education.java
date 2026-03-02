@@ -7,7 +7,8 @@ import lombok.*;
 
 @Entity
 @Table(name = "educations")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -35,12 +36,11 @@ public class Education {
 
     private Integer startYear;
     private Integer endYear;
-
+    @Column(nullable = false)
     private Boolean currentlyPursuing;
     private Integer currentSemester;
 
-
-    @ManyToOne
-    @JoinColumn(name = "student_id")
+ @ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "student_id", nullable = false)
     private Student student;
 }

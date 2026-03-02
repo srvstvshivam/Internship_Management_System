@@ -23,9 +23,8 @@ public class Student {
 
     @Column(unique = true, nullable = false)
     private String email;
-@Column(nullable = false)
-private String password;
-   
+    @Column(nullable = false)
+    private String password;
 
     private String firstName;
     private String middleName;
@@ -33,39 +32,40 @@ private String password;
 
     private LocalDate dob;
 
-   @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private Gender gender;
 
     private String profileImageUrl;
-    
-  @Column(unique = true)
-private String enrollmentNumber;
+
+    @Column(unique = true)
+    private String enrollmentNumber;
 
     @Column(unique = true)
     private String mobileNumber;
 
     @Enumerated(EnumType.STRING)
     private Role role;
-    
+
     @Embedded
     private Address address;
 
- @Builder.Default
-@Enumerated(EnumType.STRING)
-private StudentStatus status = StudentStatus.ACTIVE;
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private StudentStatus status = StudentStatus.ACTIVE;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-@PrePersist
-protected void onCreate() {
-    createdAt = LocalDateTime.now();
-    updatedAt = LocalDateTime.now();
-}
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
 
-@PreUpdate
-protected void onUpdate() {
-    updatedAt = LocalDateTime.now();
-}
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
     // Relations
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Education> educations;
@@ -73,7 +73,7 @@ protected void onUpdate() {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Project> projects;
 
-    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL,  fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private StudentProfile profile;
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkExperience> workExperiences;

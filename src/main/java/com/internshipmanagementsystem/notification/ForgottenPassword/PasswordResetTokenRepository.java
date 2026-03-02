@@ -1,7 +1,5 @@
 package com.internshipmanagementsystem.notification.ForgottenPassword;
 
-
-
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
@@ -9,7 +7,7 @@ import java.util.Optional;
 public interface PasswordResetTokenRepository
         extends JpaRepository<PasswordResetToken, Long> {
 
-    Optional<PasswordResetToken> findByEmailAndRole(String email, String role);
+    Optional<PasswordResetToken> findByEmailAndRole(String email, UserRole role);
 
-    void deleteByEmailAndRole(String email, String role);
+    void deleteByEmailAndRole(String email, UserRole role);
 }

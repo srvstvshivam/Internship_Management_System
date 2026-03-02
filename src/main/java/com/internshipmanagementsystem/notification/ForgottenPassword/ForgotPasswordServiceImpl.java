@@ -1,15 +1,17 @@
 package com.internshipmanagementsystem.notification.ForgottenPassword;
 
-
 import com.internshipmanagementsystem.notification.EmailService;
+import com.internshipmanagementsystem.student.model.Student;
 import com.internshipmanagementsystem.student.repository.StudentRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import com.internshipmanagementsystem.student.model.Student;
 
 @Service
 @RequiredArgsConstructor
@@ -17,56 +19,58 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
 
     private final PasswordResetTokenRepository tokenRepository;
     private final StudentRepository studentRepository;
-    // private final MentorRepository mentorRepository;
-    // private final CoordinatorRepository coordinatorRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
+    private final SecureRandom secureRandom = new SecureRandom();
+
     private String generateOtp() {
-        return String.valueOf((int) (Math.random() * 900000) + 100000);
+        int otp = 100000 + secureRandom.nextInt(900000);
+        return String.valueOf(otp);
     }
 
     @Override
-    public void sendOtp(String email, String role) {
+    public void sendOtp(String email, UserRole role) {
 
-        boolean exists = switch (role.toUpperCase()) {
-            case "STUDENT" -> studentRepository.findByEmail(email).isPresent();
-            // case "MENTOR" -> mentorRepository.findByEmail(email).isPresent();
-            // case "COORDINATOR" -> coordinatorRepository.findByEmail(email).isPresent();
-            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid role");
+        boolean exists = switch (role) {
+            case STUDENT -> studentRepository.findByEmail(email).isPresent();
+            case MENTOR -> false;      // Add repository logic
+            case COORDINATOR -> false; // Add repository logic
         };
 
         if (!exists) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Email not found");
         }
 
-        String otp = generateOtp();
+        String rawOtp = generateOtp();
+        String encodedOtp = passwordEncoder.encode(rawOtp);
 
         tokenRepository.deleteByEmailAndRole(email, role);
 
         PasswordResetToken token = PasswordResetToken.builder()
                 .email(email)
                 .role(role)
-                .otp(otp)
+                .otp(encodedOtp)
                 .expiryTime(LocalDateTime.now().plusMinutes(10))
+                .attemptCount(0)
                 .build();
 
         tokenRepository.save(token);
 
         String subject = "Password Reset OTP";
-
         String body = """
                 Your OTP for password reset is: %s
 
                 Valid for 10 minutes.
-                """.formatted(otp);
+                """.formatted(rawOtp);
 
         emailService.sendEmail(email, subject, body);
     }
 
     @Override
+    @Transactional
     public void resetPassword(String email,
-                              String role,
+                              UserRole role,
                               String otp,
                               String newPassword) {
 
@@ -75,32 +79,37 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid request"));
 
-        if (!token.getOtp().equals(otp)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid OTP");
-        }
-
         if (token.getExpiryTime().isBefore(LocalDateTime.now())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OTP expired");
         }
 
-        switch (role.toUpperCase()) {
-            case "STUDENT" -> {
-                Student student = studentRepository.findByEmail(email).get();
+        if (!passwordEncoder.matches(otp, token.getOtp())) {
+            token.setAttemptCount(token.getAttemptCount() + 1);
+            if (token.getAttemptCount() >= 5) {
+                tokenRepository.delete(token);
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Too many attempts");
+            }
+            tokenRepository.save(token);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid OTP");
+        }
+
+        switch (role) {
+            case STUDENT -> {
+                Student student = studentRepository.findByEmail(email)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
                 student.setPassword(passwordEncoder.encode(newPassword));
                 studentRepository.save(student);
             }
-            case "MENTOR" -> {
-                // Mentor mentor = mentorRepository.findByEmail(email).get();
-                // mentor.setPassword(passwordEncoder.encode(newPassword));
-                // mentorRepository.save(mentor);
+            case MENTOR -> {
+                // Add mentor logic
             }
-            case "COORDINATOR" -> {
-                // Coordinator coordinator = coordinatorRepository.findByEmail(email).get();
-                // coordinator.setPassword(passwordEncoder.encode(newPassword));
-                // coordinatorRepository.save(coordinator);
+            case COORDINATOR -> {
+                // Add coordinator logic
             }
         }
 
-        tokenRepository.deleteByEmailAndRole(email, role);
+        tokenRepository.delete(token);
     }
 }

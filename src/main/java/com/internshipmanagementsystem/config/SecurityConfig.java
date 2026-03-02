@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -18,61 +19,55 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    // Password Encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    //  Security Filter Chain
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
 
         http
-            .cors(cors -> {})
+            .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session ->
                     session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            ).authorizeHttpRequests(auth -> auth
+            )
+            .authorizeHttpRequests(auth -> auth
 
-    //  Public APIs
-    .requestMatchers(
-            "/api/students/register",
-            "/api/students/login",
-            "/api/admin/login",
-            "/api/mentors/login",
-            "/api/coordinators/login",
-            "/api/auth/**"
-    ).permitAll()
+                // Public endpoints
+                .requestMatchers(
+                        "/api/admin/login",
+                        "/api/auth/**",
+                        "/api/students/auth/**",
+                        "/api/mentors/auth/**",
+                        "/api/coordinator/auth/**"
+                ).permitAll()
 
-    //  Admin / Mentor / Coordinator
-    .requestMatchers("/api/admin/**").hasRole("ADMIN")
-    .requestMatchers("/api/coordinators/**").hasRole("COORDINATOR")
-    .requestMatchers("/api/mentors/**").hasRole("MENTOR")
+                //  Role-based protection
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/coordinator/**").hasRole("COORDINATOR")
+                .requestMatchers("/api/mentors/**").hasRole("MENTOR")
+                .requestMatchers("/api/students/**").hasRole("STUDENT")
 
-    //  Student APIs (ONLY protected ones)
-    .requestMatchers(
-            "/api/students/profile/**",
-            "/api/students/update/**",
-            "/api/students/apply/**"
-    ).hasRole("STUDENT")
-
-    .anyRequest().authenticated()
-)
+                // Everything else requires authentication
+                .anyRequest().authenticated()
+            )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
+    //  CORS Configuration
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-
-        configuration.setAllowedMethods(List.of(
-                "GET", "POST", "PUT", "DELETE", "OPTIONS"
-        ));
-
+        configuration.setAllowedOriginPatterns(List.of("*")); // safe for backend-only testing
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 

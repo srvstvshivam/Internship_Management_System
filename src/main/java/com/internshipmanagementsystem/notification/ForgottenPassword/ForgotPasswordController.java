@@ -1,8 +1,11 @@
 package com.internshipmanagementsystem.notification.ForgottenPassword;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.internshipmanagementsystem.notification.ForgottenPassword.DTO.ForgotPasswordRequest;
+import com.internshipmanagementsystem.notification.ForgottenPassword.DTO.ResetPasswordRequest;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -12,22 +15,27 @@ public class ForgotPasswordController {
     private final ForgotPasswordService forgotPasswordService;
 
     @PostMapping("/{role}/forgot-password")
-    public ResponseEntity<String> forgotPassword(
-            @PathVariable("role") String role,
-            @RequestParam("email") String email) {
+    public ResponseEntity<ApiResponse> forgotPassword(
+            @PathVariable UserRole role,
+            @Valid @RequestBody ForgotPasswordRequest request) {
 
-        forgotPasswordService.sendOtp(email, role);
-        return ResponseEntity.ok("OTP sent");
+        forgotPasswordService.sendOtp(request.email(), role);
+
+        return ResponseEntity.ok(new ApiResponse("OTP sent successfully"));
     }
 
     @PostMapping("/{role}/reset-password")
-    public ResponseEntity<String> resetPassword(
-            @PathVariable("role") String role,
-            @RequestParam("email") String email,
-            @RequestParam("otp") String otp,
-            @RequestParam("newPassword") String newPassword) {
+    public ResponseEntity<ApiResponse> resetPassword(
+            @PathVariable UserRole role,
+            @Valid @RequestBody ResetPasswordRequest request) {
 
-        forgotPasswordService.resetPassword(email, role, otp, newPassword);
-        return ResponseEntity.ok("Password reset successful");
+        forgotPasswordService.resetPassword(
+                request.email(),
+                role,
+                request.otp(),
+                request.newPassword()
+        );
+
+        return ResponseEntity.ok(new ApiResponse("Password reset successful"));
     }
 }

@@ -7,9 +7,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "password_reset_tokens",
-       uniqueConstraints = {
-           @UniqueConstraint(columnNames = {"email", "role"})
-       })
+       uniqueConstraints = @UniqueConstraint(columnNames = {"email", "role"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,10 +21,12 @@ public class PasswordResetToken {
 
     private String email;
 
-    private String role; // STUDENT / MENTOR / COORDINATOR
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
 
-    private String otp;
+    private String otp; // hashed OTP
 
     private LocalDateTime expiryTime;
 
+    private int attemptCount;
 }

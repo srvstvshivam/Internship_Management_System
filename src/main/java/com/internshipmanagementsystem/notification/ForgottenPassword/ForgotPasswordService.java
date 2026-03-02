@@ -2,10 +2,10 @@ package com.internshipmanagementsystem.notification.ForgottenPassword;
 
 public interface ForgotPasswordService {
 
-    void sendOtp(String email, String role);
+    void sendOtp(String email, UserRole role);
 
     void resetPassword(String email,
-                       String role,
+                       UserRole role,
                        String otp,
                        String newPassword);
 }
