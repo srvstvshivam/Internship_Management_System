@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Coordinator {
-
+//id, firstName, middleName, lastName, dateOfBirth
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
