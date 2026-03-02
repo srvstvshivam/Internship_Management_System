@@ -8,6 +8,5 @@ import java.util.Optional;
 public interface CoordinatorRepository extends JpaRepository<Coordinator, Long> {
 
     Optional<Coordinator> findByEmail(String email);
-    // Additional query methods can be defined here as needed
 
 }
