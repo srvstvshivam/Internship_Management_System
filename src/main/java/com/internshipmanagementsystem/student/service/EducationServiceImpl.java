@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.internshipmanagementsystem.user.model.User;
+import com.internshipmanagementsystem.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -24,11 +26,21 @@ public class EducationServiceImpl implements EducationService {
 
         private final EducationRepository educationRepository;
         private final StudentRepository studentRepository;
+        private final UserRepository userRepository;
 
-         private Student getStudentByEmail(String email) {
-    return studentRepository.findByEmail(email)
-        .orElseThrow(() -> new ResponseStatusException(
-            HttpStatus.NOT_FOUND, "Student not found"));
+   private Student getStudentByEmail(String email) {
+
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() ->
+                    new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "User not found"));
+
+    return studentRepository.findByUser(user)
+            .orElseThrow(() ->
+                    new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Student not found"));
 }
         
         

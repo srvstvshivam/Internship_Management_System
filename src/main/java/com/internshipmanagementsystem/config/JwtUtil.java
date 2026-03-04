@@ -1,5 +1,5 @@
 package com.internshipmanagementsystem.config;
-
+import com.internshipmanagementsystem.user.model.User;
 
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
@@ -21,15 +21,15 @@ public class JwtUtil {
     }
 
     //Generate Token with role
-    public String generateToken(String email, String role) {
-        return Jwts.builder()
-                .setSubject(email)
-                .claim("role", role)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
-                .signWith(getSignKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
+ public String generateToken(User user) {
+    return Jwts.builder()
+            .setSubject(user.getEmail())
+            .claim("role", user.getRole().name())
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
+            .signWith(getSignKey(), SignatureAlgorithm.HS256)
+            .compact();
+}
 
     // Extract Email
     public String extractEmail(String token) {

@@ -28,12 +28,11 @@ public class WorkExperienceServiceImpl
     public WorkExperienceResponse addExperience(
             String email,
             WorkExperienceRequest request) {
-
-        Student student = studentRepository
-                .findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Student not found"));
+Student student = studentRepository
+        .findByUser_Email(email)
+        .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Student not found"));
 
         WorkExperience experience = WorkExperienceMapper.toEntity(request, student);
 
@@ -45,11 +44,11 @@ public class WorkExperienceServiceImpl
     public List<WorkExperienceResponse> getExperiences(
             String email) {
 
-        Student student = studentRepository
-                .findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Student not found"));
+       Student student = studentRepository
+        .findByUser_Email(email)
+        .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Student not found"));
 
         return repository.findByStudent(student)
                 .stream()
@@ -64,11 +63,12 @@ public class WorkExperienceServiceImpl
             Long id,
             WorkExperienceRequest request) {
 
-        Student student = studentRepository
-                .findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Student not found"));
+      Student student = studentRepository
+        .findByUser_Email(email)
+        .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Student not found"));
+                        
 
         WorkExperience experience = repository.findByIdAndStudent(id, student)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -86,11 +86,11 @@ public class WorkExperienceServiceImpl
             String email,
             Long id) {
 
-        Student student = studentRepository
-                .findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Student not found"));
+      Student student = studentRepository
+        .findByUser_Email(email)
+        .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Student not found"));
 
         WorkExperience experience = repository.findByIdAndStudent(id, student)
                 .orElseThrow(() -> new ResponseStatusException(

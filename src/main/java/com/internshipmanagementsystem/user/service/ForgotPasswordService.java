@@ -1,4 +1,6 @@
-package com.internshipmanagementsystem.notification.ForgottenPassword;
+package com.internshipmanagementsystem.user.service;
+
+import com.internshipmanagementsystem.user.model.Enums.UserRole;
 
 public interface ForgotPasswordService {
 
