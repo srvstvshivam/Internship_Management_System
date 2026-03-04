@@ -5,9 +5,9 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import com.internshipmanagementsystem.student.model.enums.Role;
 import com.internshipmanagementsystem.student.model.enums.StudentStatus;
 import com.internshipmanagementsystem.student.model.enums.Gender;
+import com.internshipmanagementsystem.user.model.User;
 
 @Entity
 @Table(name = "students")
@@ -20,11 +20,6 @@ public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(unique = true, nullable = false)
-    private String email;
-    @Column(nullable = false)
-    private String password;
 
     private String firstName;
     private String middleName;
@@ -40,18 +35,17 @@ public class Student {
     @Column(unique = true)
     private String enrollmentNumber;
 
-    @Column(unique = true)
-    private String mobileNumber;
-
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
     @Embedded
     private Address address;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private StudentStatus status = StudentStatus.ACTIVE;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -66,7 +60,6 @@ public class Student {
         updatedAt = LocalDateTime.now();
     }
 
-    // Relations
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Education> educations;
 
@@ -75,6 +68,7 @@ public class Student {
 
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private StudentProfile profile;
+
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkExperience> workExperiences;
 }

@@ -28,15 +28,6 @@ public ResponseEntity<StudentResponse> register(
 
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
 }
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(
-            @Valid @RequestBody LoginRequest request) {
-
-        LoginResponse response = studentService.login(request);
-
-        return ResponseEntity.ok(response);
-    }
-
 
     // reset and forgot password will be handled by a common controller for all user 
     // types (student, mentor, coordinator) in the notification module 

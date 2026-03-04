@@ -8,14 +8,20 @@ import org.springframework.web.multipart.MultipartFile;
 import com.internshipmanagementsystem.config.CloudinaryService;
 import com.internshipmanagementsystem.config.JwtUtil;
 import com.internshipmanagementsystem.notification.registration.StudentRegistrationEmail;
+import com.internshipmanagementsystem.notification.EmailService;
 import com.internshipmanagementsystem.student.dto.*;
 import com.internshipmanagementsystem.student.mapper.StudentMapper;
 import com.internshipmanagementsystem.student.model.Student;
 import com.internshipmanagementsystem.student.repository.StudentRepository;
-import jakarta.transaction.Transactional;
+import com.internshipmanagementsystem.user.model.User;
+import com.internshipmanagementsystem.user.model.Enums.UserRole;
+import com.internshipmanagementsystem.user.repository.UserRepository;
+
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-import com.internshipmanagementsystem.notification.EmailService;
+
 import java.time.LocalDate;
 
 @Service
@@ -23,73 +29,103 @@ import java.time.LocalDate;
 public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final CloudinaryService cloudinaryService;
     private final EmailService emailService;
-
 @Transactional
 @Override
 public StudentResponse registerStudent(StudentRequest request) {
 
-    //  Validate email
-    if (studentRepository.existsByEmail(request.getEmail())) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already registered");
+    if (userRepository.existsByEmail(request.getEmail())) {
+        throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Email already registered"
+        );
     }
 
-    //  Validate mobile number
-    if (studentRepository.existsByMobileNumber(request.getMobileNumber())) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mobile number already registered");
+    if (userRepository.existsByMobileNumber(request.getMobileNumber())) {
+        throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Mobile number already registered"
+        );
     }
 
-    //  Encode password
     String encodedPassword = passwordEncoder.encode(request.getPassword());
 
-    //  Convert DTO → Entity
-    Student student = StudentMapper.toEntity(request, encodedPassword);
+    User user = User.builder()
+            .email(request.getEmail())
+            .mobileNumber(request.getMobileNumber())
+            .password(encodedPassword)
+            .role(UserRole.STUDENT)
+            .build();
 
-    //  Save student (to generate ID)
-    Student saved = studentRepository.save(student);
+    User savedUser = userRepository.save(user);
 
-    // Generate enrollment number
+    Student student = StudentMapper.toEntity(request);
+    student.setUser(savedUser);
+
+    Student savedStudent = studentRepository.save(student);
+
     String year = String.valueOf(LocalDate.now().getYear());
-    String enrollmentNumber = "STU" + year + String.format("%04d", saved.getId());
+    String enrollmentNumber = "STU" + year +
+            String.format("%04d", savedStudent.getId());
 
-    saved.setEnrollmentNumber(enrollmentNumber);
+    savedStudent.setEnrollmentNumber(enrollmentNumber);
 
-    // 7️⃣ Save updated enrollment number
-    saved = studentRepository.save(saved);
+    Student finalStudent = studentRepository.save(savedStudent);
 
-    //  Convert to response
-    StudentResponse response = StudentMapper.toResponse(saved);
+    //  Create response BEFORE using it
+    StudentResponse response =
+            StudentMapper.toResponse(finalStudent);
 
-    // Send email safely (DO NOT break registration)
+    // Send registration email
     try {
-        StudentRegistrationEmail email = new StudentRegistrationEmail(response);
+        StudentRegistrationEmail email =
+                new StudentRegistrationEmail(response);
+
         emailService.sendEmail(
                 email.getEmail(),
                 email.getSubject(),
                 email.buildBody()
         );
     } catch (Exception e) {
-        // Just log it. Do NOT throw.
         System.out.println("Email sending failed: " + e.getMessage());
     }
 
-    // 🔟 Return success
     return response;
 }
+
+
     @Override
     public LoginResponse login(LoginRequest request) {
 
-        Student student = studentRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password"));
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.UNAUTHORIZED,
+                                "Invalid email or password"));
 
-        if (!passwordEncoder.matches(request.getPassword(), student.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalidpassword");
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Invalid email or password");
         }
 
-        String token = jwtUtil.generateToken(student.getEmail(), student.getRole().name());
+        if (user.getRole() != UserRole.STUDENT) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Access denied");
+        }
+
+        Student student = studentRepository.findByUser(user)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Student profile not found"));
+
+       String token = jwtUtil.generateToken(user);
 
         return StudentMapper.toLoginResponse(student, token);
     }
@@ -97,16 +133,38 @@ public StudentResponse registerStudent(StudentRequest request) {
     @Override
     public ProfileResponse getProfile(String email) {
 
-        Student student = studentRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "User not found"));
+
+        Student student = studentRepository.findByUser(user)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Student not found"));
 
         return StudentMapper.toProfileResponse(student);
     }
 
     @Override
-    public ProfileResponse updateProfile(String email,UpdateProfileRequest request,MultipartFile file) {
+    @Transactional
+    public ProfileResponse updateProfile(String email,
+                                         UpdateProfileRequest request,
+                                         MultipartFile file) {
 
-        Student student = studentRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "User not found"));
+
+        Student student = studentRepository.findByUser(user)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Student not found"));
 
         if (request.getFirstName() != null)
             student.setFirstName(request.getFirstName());
@@ -123,8 +181,18 @@ public StudentResponse registerStudent(StudentRequest request) {
         if (request.getGender() != null)
             student.setGender(request.getGender());
 
-        if (request.getMobileNumber() != null)
-            student.setMobileNumber(request.getMobileNumber());
+       if (request.getMobileNumber() != null) {
+
+    if (userRepository.existsByMobileNumber(request.getMobileNumber())) {
+        throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Mobile number already in use"
+        );
+    }
+
+    user.setMobileNumber(request.getMobileNumber());
+    userRepository.save(user);
+}
 
         if (request.getAddress() != null)
             student.setAddress(request.getAddress());
@@ -141,5 +209,4 @@ public StudentResponse registerStudent(StudentRequest request) {
 
         return StudentMapper.toProfileResponse(updatedStudent);
     }
-
 }
