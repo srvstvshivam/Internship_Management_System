@@ -18,7 +18,6 @@ import com.internshipmanagementsystem.user.model.Enums.UserRole;
 import com.internshipmanagementsystem.user.repository.UserRepository;
 
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -34,69 +33,67 @@ public class StudentServiceImpl implements StudentService {
     private final JwtUtil jwtUtil;
     private final CloudinaryService cloudinaryService;
     private final EmailService emailService;
-@Transactional
-@Override
-public StudentResponse registerStudent(StudentRequest request) {
 
-    if (userRepository.existsByEmail(request.getEmail())) {
-        throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "Email already registered"
-        );
+    @Transactional
+    @Override
+    public StudentResponse registerStudent(StudentRequest request) {
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Email already registered"
+            );
+        }
+
+        if (userRepository.existsByMobileNumber(request.getMobileNumber())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Mobile number already registered"
+            );
+        }
+
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+        User user = User.builder()
+                .email(request.getEmail())
+                .mobileNumber(request.getMobileNumber())
+                .password(encodedPassword)
+                .role(UserRole.STUDENT)
+                .build();
+
+        User savedUser = userRepository.save(user);
+
+        Student student = StudentMapper.toEntity(request);
+        student.setUser(savedUser);
+
+        Student savedStudent = studentRepository.save(student);
+
+        String year = String.valueOf(LocalDate.now().getYear());
+        String enrollmentNumber = "STU" + year +
+                String.format("%04d", savedStudent.getId());
+
+        savedStudent.setEnrollmentNumber(enrollmentNumber);
+
+        Student finalStudent = studentRepository.save(savedStudent);
+
+        StudentResponse response =
+                StudentMapper.toResponse(finalStudent);
+
+        try {
+            StudentRegistrationEmail email =
+                    new StudentRegistrationEmail(response);
+
+            emailService.sendEmail(
+                    email.getEmail(),
+                    email.getSubject(),
+                    email.buildBody()
+            );
+        } catch (Exception e) {
+            System.out.println("Email sending failed: " + e.getMessage());
+        }
+
+        return response;
     }
-
-    if (userRepository.existsByMobileNumber(request.getMobileNumber())) {
-        throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "Mobile number already registered"
-        );
-    }
-
-    String encodedPassword = passwordEncoder.encode(request.getPassword());
-
-    User user = User.builder()
-            .email(request.getEmail())
-            .mobileNumber(request.getMobileNumber())
-            .password(encodedPassword)
-            .role(UserRole.STUDENT)
-            .build();
-
-    User savedUser = userRepository.save(user);
-
-    Student student = StudentMapper.toEntity(request);
-    student.setUser(savedUser);
-
-    Student savedStudent = studentRepository.save(student);
-
-    String year = String.valueOf(LocalDate.now().getYear());
-    String enrollmentNumber = "STU" + year +
-            String.format("%04d", savedStudent.getId());
-
-    savedStudent.setEnrollmentNumber(enrollmentNumber);
-
-    Student finalStudent = studentRepository.save(savedStudent);
-
-    //  Create response BEFORE using it
-    StudentResponse response =
-            StudentMapper.toResponse(finalStudent);
-
-    // Send registration email
-    try {
-        StudentRegistrationEmail email =
-                new StudentRegistrationEmail(response);
-
-        emailService.sendEmail(
-                email.getEmail(),
-                email.getSubject(),
-                email.buildBody()
-        );
-    } catch (Exception e) {
-        System.out.println("Email sending failed: " + e.getMessage());
-    }
-
-    return response;
-}
-
 
     @Override
     public LoginResponse login(LoginRequest request) {
@@ -125,7 +122,7 @@ public StudentResponse registerStudent(StudentRequest request) {
                                 HttpStatus.NOT_FOUND,
                                 "Student profile not found"));
 
-       String token = jwtUtil.generateToken(user);
+        String token = jwtUtil.generateToken(user);
 
         return StudentMapper.toLoginResponse(student, token);
     }
@@ -181,18 +178,18 @@ public StudentResponse registerStudent(StudentRequest request) {
         if (request.getGender() != null)
             student.setGender(request.getGender());
 
-       if (request.getMobileNumber() != null) {
+        if (request.getMobileNumber() != null) {
 
-    if (userRepository.existsByMobileNumber(request.getMobileNumber())) {
-        throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST,
-                "Mobile number already in use"
-        );
-    }
+            if (userRepository.existsByMobileNumber(request.getMobileNumber())) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Mobile number already in use"
+                );
+            }
 
-    user.setMobileNumber(request.getMobileNumber());
-    userRepository.save(user);
-}
+            user.setMobileNumber(request.getMobileNumber());
+            userRepository.save(user);
+        }
 
         if (request.getAddress() != null)
             student.setAddress(request.getAddress());
