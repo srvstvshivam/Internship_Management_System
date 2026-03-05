@@ -1,13 +1,18 @@
 package com.internshipmanagementsystem.student.model;
 
-import jakarta.persistence.*;
-import lombok.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
+import com.internshipmanagementsystem.mentor.model.Mentor;
+import com.internshipmanagementsystem.student.model.enums.Gender;
 import com.internshipmanagementsystem.student.model.enums.Role;
 import com.internshipmanagementsystem.student.model.enums.StudentStatus;
-import com.internshipmanagementsystem.student.model.enums.Gender;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "students")
@@ -16,19 +21,31 @@ import com.internshipmanagementsystem.student.model.enums.Gender;
 @AllArgsConstructor
 @Builder
 public class Student {
-
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
+    private String enrollmentNumber;
+
+    @Column(nullable = false, unique = true)
     private String email;
+
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
     private String firstName;
+
     private String middleName;
+
+    @Column(nullable = false)
     private String lastName;
+
+    private String phoneNumber;
+
+    private String mobileNumber;
 
     private LocalDate dob;
 
@@ -37,44 +54,25 @@ public class Student {
 
     private String profileImageUrl;
 
-    @Column(unique = true)
-    private String enrollmentNumber;
-
-    @Column(unique = true)
-    private String mobileNumber;
-
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Enumerated(EnumType.STRING)
+    private StudentStatus status;
 
     @Embedded
     private Address address;
 
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    private StudentStatus status = StudentStatus.ACTIVE;
+    // Many students can have one mentor
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mentor_id")
+    private Mentor mentor;
+
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
     }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
-    // Relations
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
-    private List<Education> educations;
-
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
-    private List<Project> projects;
-
-    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private StudentProfile profile;
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<WorkExperience> workExperiences;
 }
