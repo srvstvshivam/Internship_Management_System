@@ -14,7 +14,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
@@ -35,23 +37,31 @@ public class JwtFilter extends OncePerRequestFilter {
 
             String token = authHeader.substring(7);
 
-            if (jwtUtil.validateToken(token)) {
+            try {
+                if (jwtUtil.validateToken(token)) {
 
-                String email = jwtUtil.extractEmail(token);
-                String role = jwtUtil.extractRole(token);
+                    String email = jwtUtil.extractEmail(token);
+                    String rolesStr = jwtUtil.extractRole(token); // could be comma-separated roles
 
-                // 🔥 FIX: Ensure role always starts with ROLE_
-                if (role != null && !role.startsWith("ROLE_")) {
-                    role = "ROLE_" + role;
+                    List<String> roles = rolesStr != null ?
+                            Arrays.asList(rolesStr.split(",")) :
+                            List.of();
+
+                    List<GrantedAuthority> authorities = roles.stream()
+                            .map(String::trim)
+                            .filter(r -> !r.isEmpty())
+                            .map(String::toUpperCase)               // Force uppercase
+                            .map(r -> r.startsWith("ROLE_") ? r : "ROLE_" + r) // Add ROLE_ prefix
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList());
+
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(email, null, authorities);
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
-
-                List<GrantedAuthority> authorities =
-                        List.of(new SimpleGrantedAuthority(role));
-
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(email, null, authorities);
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } catch (Exception e) {
+                logger.warn("Invalid JWT token: " + token + " | Reason: " + e.getMessage());
             }
         }
 

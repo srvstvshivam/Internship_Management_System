@@ -1,18 +1,21 @@
 package com.internshipmanagementsystem.admin.mapper;
 
-import com.internshipmanagementsystem.admin.dtos.CreateUserRequest;
+
+import com.internshipmanagementsystem.admin.dtos.UserDTO;
 import com.internshipmanagementsystem.admin.model.User;
-// import com.internshipmanagementsystem.admin.model.Enum.Role;
+import com.internshipmanagementsystem.admin.model.Enums.Role;
 
 public class UserMapper {
 
-    public static User toEntity(CreateUserRequest request, String encodedPassword) {
-        return User.builder()
-                .name(request.getName())
-                .email(request.getEmail())
-                .password(encodedPassword)
-                // .role(request.getRole())
-                .firstLogin(true)
+    public static UserDTO toDTO(User user) {
+        return UserDTO.builder()
+                .id(user.getId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .phone(user.getPhone())
+                .department(user.getDepartment())
+                .role(user.getRole())
+                .mentorId(user.getMentor() != null ? user.getMentor().getId() : null)
                 .build();
     }
 }
