@@ -1,8 +1,11 @@
 package com.internshipmanagementsystem.admin.controller;
 
+import com.internshipmanagementsystem.admin.model.Internship;
 import com.internshipmanagementsystem.admin.dtos.InternshipDTO;
 import com.internshipmanagementsystem.admin.service.InternshipService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,20 +16,27 @@ public class InternshipController {
     private final InternshipService service;
 
     @PostMapping("/create")
-    public InternshipDTO create(@RequestBody InternshipDTO internshipDTO) {
-
-        return service.create(internshipDTO);
+    public ResponseEntity<InternshipDTO> create(@RequestBody InternshipDTO internship){
+        InternshipDTO created = service.create(internship);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{id}")
-    public InternshipDTO update(@PathVariable Long id,
-                                @RequestBody InternshipDTO internshipDTO) {
-
-        return service.update(id, internshipDTO);
+    public ResponseEntity<InternshipDTO> update(@PathVariable Long id,
+                                                @RequestBody InternshipDTO internship){
+        InternshipDTO updated = service.update(id, internship);
+        if (updated == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/delete/{id}")
-    public void delete(@PathVariable Long id) {
-        service.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable Long id){
+        boolean deleted = service.delete(id);
+        if (!deleted) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

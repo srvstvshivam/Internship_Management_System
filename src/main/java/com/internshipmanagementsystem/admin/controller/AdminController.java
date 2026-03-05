@@ -2,10 +2,8 @@ package com.internshipmanagementsystem.admin.controller;
 
 import com.internshipmanagementsystem.admin.dtos.LoginRequest;
 import com.internshipmanagementsystem.admin.dtos.LoginResponse;
-import com.internshipmanagementsystem.admin.dtos.UserDTO;
-import com.internshipmanagementsystem.admin.model.User;
-import com.internshipmanagementsystem.admin.service.AuthService;
-import com.internshipmanagementsystem.admin.service.UserService;
+
+import com.internshipmanagementsystem.config.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,51 +17,31 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AdminController {
 
-    private final AuthService authService;
-    private final UserService userService;
+    
+    private final JwtUtil jwtUtil;
 
-    // 🔓 Login (Public)
+    private static final String EMAIL = "admin@gmail.com";
+    private static final String PASSWORD = "admin123";
+
+    //  Admin Login
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+public ResponseEntity<LoginResponse> adminLogin(@RequestBody LoginRequest login) {
+
+    if (EMAIL.equals(login.getEmail()) &&
+        PASSWORD.equals(login.getPassword())) {
+
+        String token = jwtUtil.generateToken(EMAIL, "ADMIN");
+
+        LoginResponse response = LoginResponse.builder()
+                .token(token)
+                .email(EMAIL)
+                .role("ADMIN")
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
-    // 🔐 Dashboard (ADMIN only)
-    @GetMapping("/dashboard")
-    @PreAuthorize("hasRole('ADMIN')")
-    public String adminDashboard() {
-        return "Welcome Admin!";
-    }
-
-    // ✅ Create User (DTO Based)
-    @PostMapping("/users")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserDTO> create(@RequestBody User user) {
-
-        UserDTO createdUser = userService.create(user);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(createdUser);
-    }
-
-    // ✅ Update User
-    @PutMapping("/users/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserDTO> update(
-            @PathVariable Long id,
-            @RequestBody User user) {
-
-        UserDTO updatedUser = userService.update(id, user);
-        return ResponseEntity.ok(updatedUser);
-    }
-
-    // ✅ Delete User
-    @DeleteMapping("/users/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> delete(@PathVariable Long id) {
-
-        userService.delete(id);
-        return ResponseEntity.ok("User deleted successfully");
-    }
+    throw new RuntimeException("Invalid Admin credentials");
+}
+    
 }

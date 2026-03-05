@@ -1,68 +1,69 @@
 package com.internshipmanagementsystem.config;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Component
+@RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
-            FilterChain filterChain
-    ) throws ServletException, IOException {
+            FilterChain filterChain)
+            throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-            String token = authHeader.substring(7);
+        String token = authHeader.substring(7);
 
-            try {
-                if (jwtUtil.validateToken(token)) {
+        if (!jwtUtil.validateToken(token)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-                    String email = jwtUtil.extractEmail(token);
-                    String rolesStr = jwtUtil.extractRole(token); // could be comma-separated roles
+        String email = jwtUtil.extractEmail(token);
+        String role = jwtUtil.extractRole(token);
 
-                    List<String> roles = rolesStr != null ?
-                            Arrays.asList(rolesStr.split(",")) :
-                            List.of();
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                    List<GrantedAuthority> authorities = roles.stream()
-                            .map(String::trim)
-                            .filter(r -> !r.isEmpty())
-                            .map(String::toUpperCase)               // Force uppercase
-                            .map(r -> r.startsWith("ROLE_") ? r : "ROLE_" + r) // Add ROLE_ prefix
-                            .map(SimpleGrantedAuthority::new)
-                            .collect(Collectors.toList());
+            List<SimpleGrantedAuthority> authorities =
+                    List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(email, null, authorities);
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            email,
+                            null,
+                            authorities
+                    );
 
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
-            } catch (Exception e) {
-                logger.warn("Invalid JWT token: " + token + " | Reason: " + e.getMessage());
-            }
+            authentication.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request)
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
         filterChain.doFilter(request, response);
