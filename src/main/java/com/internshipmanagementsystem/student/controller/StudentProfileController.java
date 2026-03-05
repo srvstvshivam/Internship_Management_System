@@ -19,12 +19,10 @@ public class StudentProfileController {
 
     private final StudentService studentService;
     private final EducationService educationService;
-    private final ProjectService projectService;
-    private final WorkExperienceService workExperienceService;
+//     private final ProjectService projectService;
+//     private final WorkExperienceService workExperienceService;
 
-    // =========================
-    // PROFILE
-    // =========================
+  
 
     @GetMapping
     public ResponseEntity<ProfileResponse> getProfile(
@@ -46,9 +44,7 @@ public class StudentProfileController {
         );
     }
 
-    // =========================
-    // EDUCATION
-    // =========================
+
 
     @GetMapping("/educations")
     public ResponseEntity<EducationListResponse> getEducations(
@@ -89,89 +85,245 @@ public class StudentProfileController {
         return ResponseEntity.noContent().build();
     }
 
-    // =========================
-    // PROJECTS
-    // =========================
-
-    @GetMapping("/projects")
-    public ResponseEntity<List<ProjectResponse>> getProjects(
-            @AuthenticationPrincipal String email) {
-
-        return ResponseEntity.ok(
-                projectService.getProjects(email)
-        );
-    }
-
-    @PostMapping("/projects")
-    public ResponseEntity<ProjectResponse> addProject(
-            @AuthenticationPrincipal String email,
-            @RequestBody ProjectRequest request) {
-
-        return ResponseEntity.ok(
-                projectService.addProject(email, request)
-        );
-    }
-
-    @PutMapping("/projects/{id}")
-    public ResponseEntity<ProjectResponse> updateProject(
-            @AuthenticationPrincipal String email,
-            @PathVariable Long id,
-            @RequestBody ProjectRequest request) {
-
-        return ResponseEntity.ok(
-                projectService.updateProject(email, id, request)
-        );
-    }
-
-    @DeleteMapping("/projects/{id}")
-    public ResponseEntity<Void> deleteProject(
-            @AuthenticationPrincipal String email,
-            @PathVariable Long id) {
-
-        projectService.deleteProject(email, id);
-        return ResponseEntity.noContent().build();
-    }
-
-    // =========================
-    // WORK EXPERIENCE
-    // =========================
-
-    @GetMapping("/work-experiences")
-    public ResponseEntity<List<WorkExperienceResponse>> getWorkExperiences(
-            @AuthenticationPrincipal String email) {
-
-        return ResponseEntity.ok(
-                workExperienceService.getExperiences(email)
-        );
-    }
-
-    @PostMapping("/work-experiences")
-    public ResponseEntity<WorkExperienceResponse> addWorkExperience(
-            @AuthenticationPrincipal String email,
-            @RequestBody WorkExperienceRequest request) {
-
-        return ResponseEntity.ok(
-                workExperienceService.addExperience(email, request)
-        );
-    }
-
-    @PutMapping("/work-experiences/{id}")
-    public ResponseEntity<WorkExperienceResponse> updateWorkExperience(
-            @AuthenticationPrincipal String email,
-            @PathVariable Long id,
-            @RequestBody WorkExperienceRequest request) {
-
-        return ResponseEntity.ok(
-                workExperienceService.updateExperience(email, id, request)
-        );
-    }
-
-    @DeleteMapping("/work-experiences/{id}")
-    public ResponseEntity<Void> deleteWorkExperience(
-            @AuthenticationPrincipal String email,
-            @PathVariable Long id) {
-
-        workExperienceService.deleteExperience(email, id);
-        return ResponseEntity.noContent().build();
-    }
+   
+ 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//     @GetMapping("/projects")
+//     public ResponseEntity<List<ProjectResponse>> getProjects(
+//             @AuthenticationPrincipal String email) {
+
+//         return ResponseEntity.ok(
+//                 projectService.getProjects(email)
+//         );
+//     }
+
+//     @PostMapping("/projects")
+//     public ResponseEntity<ProjectResponse> addProject(
+//             @AuthenticationPrincipal String email,
+//             @RequestBody ProjectRequest request) {
+
+//         return ResponseEntity.ok(
+//                 projectService.addProject(email, request)
+//         );
+//     }
+
+//     @PutMapping("/projects/{id}")
+//     public ResponseEntity<ProjectResponse> updateProject(
+//             @AuthenticationPrincipal String email,
+//             @PathVariable Long id,
+//             @RequestBody ProjectRequest request) {
+
+//         return ResponseEntity.ok(
+//                 projectService.updateProject(email, id, request)
+//         );
+//     }
+
+//     @DeleteMapping("/projects/{id}")
+//     public ResponseEntity<Void> deleteProject(
+//             @AuthenticationPrincipal String email,
+//             @PathVariable Long id) {
+
+//         projectService.deleteProject(email, id);
+//         return ResponseEntity.noContent().build();
+//     }
+
+
+
+//     @GetMapping("/work-experiences")
+//     public ResponseEntity<List<WorkExperienceResponse>> getWorkExperiences(
+//             @AuthenticationPrincipal String email) {
+
+//         return ResponseEntity.ok(
+//                 workExperienceService.getExperiences(email)
+//         );
+//     }
+
+//     @PostMapping("/work-experiences")
+//     public ResponseEntity<WorkExperienceResponse> addWorkExperience(
+//             @AuthenticationPrincipal String email,
+//             @RequestBody WorkExperienceRequest request) {
+
+//         return ResponseEntity.ok(
+//                 workExperienceService.addExperience(email, request)
+//         );
+//     }
+
+//     @PutMapping("/work-experiences/{id}")
+//     public ResponseEntity<WorkExperienceResponse> updateWorkExperience(
+//             @AuthenticationPrincipal String email,
+//             @PathVariable Long id,
+//             @RequestBody WorkExperienceRequest request) {
+
+//         return ResponseEntity.ok(
+//                 workExperienceService.updateExperience(email, id, request)
+//         );
+//     }
+
+//     @DeleteMapping("/work-experiences/{id}")
+//     public ResponseEntity<Void> deleteWorkExperience(
+//             @AuthenticationPrincipal String email,
+//             @PathVariable Long id) {
+
+//         workExperienceService.deleteExperience(email, id);
+//         return ResponseEntity.noContent().build();
+//     }

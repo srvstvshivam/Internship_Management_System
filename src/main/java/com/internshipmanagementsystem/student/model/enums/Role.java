@@ -2,7 +2,7 @@ package com.internshipmanagementsystem.student.model.enums;
 
 public enum Role {
     STUDENT,
-    ADMIN,
+    MENTOR,
     COORDINATOR,
-    MENTOR
+    ADMIN
 }
