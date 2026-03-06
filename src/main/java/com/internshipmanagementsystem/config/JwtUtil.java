@@ -12,7 +12,7 @@ import java.util.Date;
 public class JwtUtil {
 
     private final String SECRET = "MTY0ODg0NDM4NjY3OTQyOTQ2ODc1NjMxNDYyMzQ1Njc4OTA3NjU0MzIxMDk4NzY1";
-    private final long EXPIRATION = 1000*60*60;
+    private final long EXPIRATION = 1000*60*60*24;
     
 
     //Create a proper HMAC SHA key from these bytes.
@@ -25,6 +25,18 @@ public class JwtUtil {
     return Jwts.builder()
             .setSubject(user.getEmail())
             .claim("role", user.getRole().name())
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
+            .signWith(getSignKey(), SignatureAlgorithm.HS256)
+            .compact();
+}
+
+
+
+public String generateToken(String email, String role) {
+    return Jwts.builder()
+            .setSubject(email)
+            .claim("role", role)
             .setIssuedAt(new Date())
             .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
             .signWith(getSignKey(), SignatureAlgorithm.HS256)

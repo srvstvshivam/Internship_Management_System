@@ -13,44 +13,25 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     //  Validation Errors (Missing Fields)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidation(MethodArgumentNotValidException ex) {
+   @ExceptionHandler(DataIntegrityViolationException.class)
+public ResponseEntity<?> handleDuplicate(DataIntegrityViolationException ex) {
 
-        Map<String, Object> response = new HashMap<>();
-        Map<String, String> errors = new HashMap<>();
+    Map<String, Object> response = new HashMap<>();
+    response.put("timestamp", LocalDateTime.now());
+    response.put("status", 400);
 
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage())
-        );
+    String message = ex.getMostSpecificCause().getMessage().toLowerCase();
 
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", 400);
-        response.put("errors", errors);
-
-        return ResponseEntity.badRequest().body(response);
-    }
-
-    // Duplicate Email
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<?> handleDuplicate(DataIntegrityViolationException ex) {
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", 400);
+    if (message.contains("email")) {
         response.put("message", "Email already exists");
-
-        return ResponseEntity.badRequest().body(response);
+    } else if (message.contains("title")) {
+        response.put("message", "Internship with this title already exists");
+    } else if (message.contains("phone")) {
+        response.put("message", "Phone number already exists");
+    } else {
+        response.put("message", "Duplicate entry - record already exists");
     }
 
-    //  Generic Runtime
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<?> handleRuntime(RuntimeException ex) {
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", 400);
-        response.put("message", ex.getMessage());
-
-        return ResponseEntity.badRequest().body(response);
-    }
+    return ResponseEntity.badRequest().body(response);
+}
 }
