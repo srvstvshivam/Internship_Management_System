@@ -4,13 +4,14 @@ import com.internshipmanagementsystem.mentor.model.Mentor;
 import com.internshipmanagementsystem.student.model.enums.Gender;
 import com.internshipmanagementsystem.student.model.enums.Role;
 import com.internshipmanagementsystem.student.model.enums.StudentStatus;
-import com.internshipmanagementsystem.user.model.User;
+import com.internshipmanagementsystem.user.model.User; 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,7 +19,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "students")
-@Data
+@Getter 
+@Setter 
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -67,13 +69,13 @@ public class Student {
     @Enumerated(EnumType.STRING)
     private StudentStatus status = StudentStatus.ACTIVE;
 
-    // --- YOUR WORK: The Mentor Relationship ---
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mentor_id")
     private Mentor mentor;
 
-    // --- TEAM'S WORK: New Relationships ---
+    
+    @JsonIgnore 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
@@ -82,15 +84,15 @@ public class Student {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Education> educations;
 
-    @JsonIgnore
+    @JsonIgnore 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Project> projects;
 
-    @JsonIgnore
+    @JsonIgnore 
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private StudentProfile profile;
 
-    @JsonIgnore
+    @JsonIgnore 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkExperience> workExperiences;
 
