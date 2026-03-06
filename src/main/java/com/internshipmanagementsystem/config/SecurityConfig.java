@@ -43,13 +43,14 @@ public class SecurityConfig {
                         "/api/auth/**",
                         "/api/students/auth/**",
                         "/api/mentors/auth/**",
-                        "/api/coordinator/auth/**"
+                        "/api/coordinator/auth/**",
+                        "/api/mentors/**"
                 ).permitAll()
 
                 //  Role-based protection
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/coordinator/**").hasRole("COORDINATOR")
-                .requestMatchers("/api/mentors/**").hasRole("MENTOR")
+                // .requestMatchers("/api/mentors/**").hasRole("MENTOR")
                 .requestMatchers("/api/students/**").hasRole("STUDENT")
 
                 // Everything else requires authentication
