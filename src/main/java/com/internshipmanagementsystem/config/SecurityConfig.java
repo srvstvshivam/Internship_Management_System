@@ -33,32 +33,23 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-        http
-            .csrf(csrf -> csrf.disable())
-
+        http.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
 
                 // PUBLIC ROUTES
                 .requestMatchers("/api/admin/login").permitAll()
 
-                // ADMIN ROUTES
+                // ADMIN ROUTES (includes coordinators)
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                 // INTERNSHIP ROUTES
-                .requestMatchers("/api/internships/create")
-                        .hasAnyRole("ADMIN","COORDINATOR")
-
-                .requestMatchers("/api/internships/update/**")
-                        .hasAnyRole("ADMIN","COORDINATOR")
-
-                .requestMatchers("/api/internships/delete/**")
-                        .hasRole("ADMIN")
+                .requestMatchers("/api/internships/create").hasAnyRole("ADMIN","COORDINATOR")
+                .requestMatchers("/api/internships/update/**").hasAnyRole("ADMIN","COORDINATOR")
+                .requestMatchers("/api/internships/delete/**").hasRole("ADMIN")
 
                 // OTHER ROUTES
                 .anyRequest().authenticated()
             )
-
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
