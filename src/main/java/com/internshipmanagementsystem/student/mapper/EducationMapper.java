@@ -4,26 +4,32 @@ import com.internshipmanagementsystem.student.dto.EducationRequest;
 import com.internshipmanagementsystem.student.dto.EducationResponse;
 import com.internshipmanagementsystem.student.model.Education;
 import com.internshipmanagementsystem.student.model.Student;
-
+import com.internshipmanagementsystem.student.model.enums.DocumentType;
 public class EducationMapper {
 
-    public static EducationResponse toResponse(Education education) {
-        return EducationResponse.builder()
-                .id(education.getId())
-                .educationLevel(education.getEducationLevel())
-                .institutionName(education.getInstitutionName())
-                .educationType(education.getEducationType())
-                .boardOrUniversity(education.getBoardOrUniversity())
-                .specialization(education.getSpecialization())
-                .percentageOrCgpa(education.getPercentageOrCgpa())
-                .gradingType(education.getGradingType())
-                .marksheetUrl(education.getMarksheetUrl())
-                .startYear(education.getStartYear())
-                .endYear(education.getEndYear())
-                .currentlyPursuing(education.getCurrentlyPursuing())
-                .currentSemester(education.getCurrentSemester())
-                .build();
-    }
+  public static EducationResponse toResponse(Education education) {
+
+    boolean marksheetUploaded =
+            education.getDocuments() != null &&
+            education.getDocuments().stream()
+                    .anyMatch(doc -> doc.getDocumentType() == DocumentType.MARKSHEET);
+
+    return EducationResponse.builder()
+            .id(education.getId())
+            .educationLevel(education.getEducationLevel())
+            .institutionName(education.getInstitutionName())
+            .educationType(education.getEducationType())
+            .boardOrUniversity(education.getBoardOrUniversity())
+            .specialization(education.getSpecialization())
+            .percentageOrCgpa(education.getPercentageOrCgpa())
+            .gradingType(education.getGradingType())
+            .startYear(education.getStartYear())
+            .endYear(education.getEndYear())
+            .currentlyPursuing(education.getCurrentlyPursuing())
+            .currentSemester(education.getCurrentSemester())
+            .marksheetUploaded(marksheetUploaded)
+            .build();
+}
     public static Education toEntity(EducationRequest request, Student student) {
 
     return Education.builder()

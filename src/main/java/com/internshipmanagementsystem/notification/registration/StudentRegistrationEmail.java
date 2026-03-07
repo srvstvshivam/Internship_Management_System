@@ -15,12 +15,11 @@ public class StudentRegistrationEmail {
     }
 
     public String getSubject() {
-        // Professional subjects usually avoid emojis, but 
-        // "Official Notification" branding works well.
         return "Registration Confirmed - Internship Management System";
     }
 
     public String buildBody() {
+
         String middle = (student.getMiddleName() != null && !student.getMiddleName().isBlank())
                 ? student.getMiddleName() + " "
                 : "";
@@ -39,42 +38,67 @@ public class StudentRegistrationEmail {
                         .footer { background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #70757a; border-top: 1px solid #e0e0e0; }
                         .info-box { background-color: #f1f3f4; border-radius: 6px; padding: 20px; margin: 25px 0; }
                         .info-item { margin-bottom: 10px; font-size: 14px; }
-                        .btn { display: inline-block; padding: 12px 30px; color: #ffffff !important; background-color: #1a73e8; 
+                        .btn { display: inline-block; padding: 12px 30px; color: #ffffff !important; background-color: #1a73e8;
                                text-decoration: none; border-radius: 4px; font-weight: 600; margin-top: 20px; }
-                        .label { color: #5f6368; font-weight: bold; width: 150px; display: inline-block; }
+                        .label { color: #5f6368; font-weight: bold; width: 160px; display: inline-block; }
                     </style>
                 </head>
                 <body>
                     <div class="container">
+
                         <div class="header">
                             <h1 style="margin:0; font-size: 24px;">Registration Successful</h1>
                         </div>
+
                         <div class="content">
+
                             <p style="font-size: 16px;">Dear <strong>%s</strong>,</p>
-                            <p>Welcome to the <strong>Internship Management System</strong>. Your account has been successfully created and is now active.</p>
-                            
+
+                            <p>
+                                Welcome to the <strong>Internship Management System</strong>.
+                                Your account has been successfully created and is now active.
+                            </p>
+
                             <div class="info-box">
-                                <div class="info-item"><span class="label">Enrollment No:</span> %s</div>
-                                <div class="info-item"><span class="label">Mobile Number:</span> %s</div>
+
+                                <div class="info-item">
+                                    <span class="label">Candidate ID (Login ID):</span> %s
+                                </div>
+
+                                <div class="info-item">
+                                    <span class="label">Email:</span> %s
+                                </div>
+
+                                <div class="info-item">
+                                    <span class="label">Mobile Number:</span> %s
+                                </div>
+
                             </div>
 
-                            <p>You can now log in to your dashboard to complete your profile and browse available internship opportunities.</p>
-                            
+                            <p>
+                                You can login to the portal using your <strong>Candidate ID, Email, or Mobile Number</strong>
+                                along with your password.
+                            </p>
+
                             <div style="text-align: center;">
                                 <a href="http://localhost:8082/login" class="btn">Access Student Portal</a>
                             </div>
+
                         </div>
+
                         <div class="footer">
                             <p>This is an automated message, please do not reply directly to this email.</p>
                             <p>&copy; 2026 Internship Management System | All Rights Reserved</p>
                         </div>
+
                     </div>
                 </body>
                 </html>
                 """.formatted(
-                        fullName,
-                        student.getEnrollmentNumber(),
-                        student.getMobileNumber()
-                );
+                fullName,
+                student.getEnrollmentNumber(), // Candidate ID
+                student.getEmail(),
+                student.getMobileNumber()
+        );
     }
 }

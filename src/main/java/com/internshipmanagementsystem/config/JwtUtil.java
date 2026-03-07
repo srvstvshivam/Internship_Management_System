@@ -52,11 +52,13 @@ public class JwtUtil {
 
     // Validate Token
     public boolean validateToken(String token) {
-        try {
-            extractAllClaims(token);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    try {
+        extractAllClaims(token);
+        return true;
+    } catch (Exception e) {
+        System.out.println("JWT VALIDATION ERROR: " + e.getMessage());
+        e.printStackTrace();
+        return false;
     }
+}
 }

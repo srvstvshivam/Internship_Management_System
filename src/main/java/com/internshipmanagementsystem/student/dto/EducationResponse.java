@@ -20,8 +20,7 @@ public class EducationResponse {
     private Double percentageOrCgpa;
     private String gradingType;
 
-    private String marksheetUrl;
-
+    private Boolean marksheetUploaded;
     private Integer startYear;
     private Integer endYear;
 

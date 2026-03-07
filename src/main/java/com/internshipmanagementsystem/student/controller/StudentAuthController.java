@@ -12,7 +12,7 @@ import com.internshipmanagementsystem.student.service.StudentService;
 
 
 @RestController
-@RequestMapping("/api/students/auth")
+@RequestMapping("/students/auth")
 @RequiredArgsConstructor
 @CrossOrigin
 public class StudentAuthController {

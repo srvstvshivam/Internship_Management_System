@@ -69,29 +69,53 @@ public static StudentResponse toResponse(Student student) {
 }
 
 
-   public static ProfileResponse toProfileResponse(Student student) {
+ public static ProfileResponse toProfileResponse(Student student) {
 
     return ProfileResponse.builder()
             .id(student.getId())
             .enrollmentNumber(student.getEnrollmentNumber())
+
             .primaryEmail(
                     student.getUser() != null
                             ? student.getUser().getEmail()
                             : null
             )
+
             .mobileNumber(
                     student.getUser() != null
                             ? student.getUser().getMobileNumber()
                             : null
             )
+
             .firstName(student.getFirstName())
             .middleName(student.getMiddleName())
             .lastName(student.getLastName())
             .dob(student.getDob())
-            .gender(student.getGender() != null ? student.getGender().name() : null)
+
+            .gender(
+                    student.getGender() != null
+                            ? student.getGender().name()
+                            : null
+            )
+
             .profileImageUrl(student.getProfileImageUrl())
-            .status(student.getStatus() != null ? student.getStatus().name() : null)
-            .address(student.getAddress())
+
+            .status(
+                    student.getStatus() != null
+                            ? student.getStatus().name()
+                            : null
+            )
+
+            // Permanent Address
+            .permanentAddress(
+                    AddressMapper.toResponse(student.getPermanentAddress())
+            )
+
+            // Correspondence Address
+            .correspondenceAddress(
+                    AddressMapper.toResponse(student.getCorrespondenceAddress())
+            )
+
             .build();
 }
 }

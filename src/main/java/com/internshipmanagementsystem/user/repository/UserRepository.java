@@ -10,14 +10,19 @@ import com.internshipmanagementsystem.user.model.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    Optional<User> findByEmailOrMobileNumber(String email, String mobileNumber);
+    Optional<User> findByLoginIdOrEmailOrMobileNumber(
+            String loginId,
+            String email,
+            String mobileNumber
+    );
 
     Optional<User> findByMobileNumber(String mobileNumber);
 
-     Optional<User> findByEmail(String email);
+    Optional<User> findByEmail(String email);
 
     boolean existsByMobileNumber(String mobileNumber);
 
-    boolean existsByEmail(String email);           // 👈 ADD THIS
+    boolean existsByEmail(String email);
 
+    boolean existsByLoginId(String loginId);
 }

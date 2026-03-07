@@ -26,51 +26,50 @@ public class SecurityConfig {
     }
 
     //  Security Filter Chain
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
+   @Bean
+public SecurityFilterChain filterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
 
-        http
-            .cors(Customizer.withDefaults())
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session ->
-                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-            .authorizeHttpRequests(auth -> auth
+    http
+        .cors(Customizer.withDefaults())
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        )
+        .authorizeHttpRequests(auth -> auth
 
-                // Public endpoints
-                .requestMatchers(
-                        "/api/admin/login",
-                        "/api/auth/**",
-                        "/api/students/auth/**",
-                        "/api/mentors/auth/**",
-                        "/api/coordinator/auth/**"
-                ).permitAll()
+            // Public endpoints
+            .requestMatchers(
+                    "/error",
+                    "/auth/**",
+                    "/admin/login",
+                    "/students/auth/**",
+                    "/mentors/auth/**",
+                    "/coordinator/auth/**"
+            ).permitAll()
 
-                //  Role-based protection
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/coordinator/**").hasRole("COORDINATOR")
-                .requestMatchers("/api/mentors/**").hasRole("MENTOR")
-                .requestMatchers("/api/students/**").hasRole("STUDENT")
+            // Role protected
+            .requestMatchers("/admin/**").hasRole("ADMIN")
+            .requestMatchers("/coordinator/**").hasRole("COORDINATOR")
+            .requestMatchers("/mentors/**").hasRole("MENTOR")
+            .requestMatchers("/students/**").hasRole("STUDENT")
 
-                // Everything else requires authentication
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+            .anyRequest().authenticated()
+        )
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
-
+    return http.build();
+}
     //  CORS Configuration
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
-        CorsConfiguration configuration = new CorsConfiguration();
+      CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(List.of("*")); // safe for backend-only testing
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
-
+configuration.setAllowedOrigins(List.of("http://localhost:5173")); // React app
+configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+configuration.setAllowedHeaders(List.of("*"));
+configuration.setAllowCredentials(true);
+configuration.setMaxAge(3600L); // cache preflight for 1 hour
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
 

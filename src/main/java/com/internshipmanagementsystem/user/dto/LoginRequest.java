@@ -1,10 +1,11 @@
 package com.internshipmanagementsystem.user.dto;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
+import lombok.Data;
+
+@Data
 public class LoginRequest {
-  private String email;
-private String password;
+
+    private String identifier;   // loginId OR email OR mobile
+    private String password;
+
 }

@@ -4,10 +4,7 @@ import com.internshipmanagementsystem.user.model.Enums.UserRole;
 
 public interface ForgotPasswordService {
 
-    void sendOtp(String email, UserRole role);
+    void sendOtp(String email);
 
-    void resetPassword(String email,
-                       UserRole role,
-                       String otp,
-                       String newPassword);
+ void resetPassword(String email, String otp, String newPassword);
 }
