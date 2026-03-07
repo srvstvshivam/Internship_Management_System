@@ -1,12 +1,14 @@
 package com.internshipmanagementsystem.student.service;
 
+import com.internshipmanagementsystem.config.CloudinaryService;
 import com.internshipmanagementsystem.student.dto.*;
 import com.internshipmanagementsystem.student.mapper.EducationMapper;
 import com.internshipmanagementsystem.student.model.Education;
 import com.internshipmanagementsystem.student.model.Student;
 import com.internshipmanagementsystem.student.repository.EducationRepository;
 import com.internshipmanagementsystem.student.repository.StudentRepository;
-
+import com.internshipmanagementsystem.student.model.enums.DocumentType;
+import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import com.internshipmanagementsystem.user.model.User;
 import com.internshipmanagementsystem.user.repository.UserRepository;
+import com.internshipmanagementsystem.student.repository.EducationDocumentRepository;
+import com.internshipmanagementsystem.student.model.EducationDocument;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +31,12 @@ public class EducationServiceImpl implements EducationService {
         private final EducationRepository educationRepository;
         private final StudentRepository studentRepository;
         private final UserRepository userRepository;
+        private final EducationDocumentRepository educationDocumentRepository;
+private final CloudinaryService cloudinaryService;
+
+
+
+
 
    private Student getStudentByEmail(String email) {
 
@@ -63,6 +73,7 @@ public class EducationServiceImpl implements EducationService {
         }
 
         @Override
+        @Transactional
         public EducationListResponse getEducations(String email) {
 
                Student student = getStudentByEmail(email);
@@ -141,5 +152,73 @@ public class EducationServiceImpl implements EducationService {
 
                 educationRepository.delete(education);
         }
+@Override
+@Transactional
+public EducationDocumentResponse uploadMarksheet(String email, Long educationId, MultipartFile file) {
+
+    Student student = getStudentByEmail(email);
+
+    Education education = educationRepository
+            .findByIdAndStudent(educationId, student)
+            .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Education not found"));
+
+    String fileUrl = cloudinaryService.uploadFile(file, "student/marksheets");
+
+    EducationDocument document = EducationDocument.builder()
+            .education(education)
+            .documentType(DocumentType.MARKSHEET)
+            .fileUrl(fileUrl)
+            .build();
+
+    EducationDocument saved = educationDocumentRepository.save(document);
+
+    return EducationDocumentResponse.builder()
+            .id(saved.getId())
+            .documentType(saved.getDocumentType().name())
+            .fileUrl(saved.getFileUrl())
+            .build();
+}
+@Override
+public List<EducationDocumentResponse> getEducationDocuments(String email, Long educationId) {
+
+    Student student = getStudentByEmail(email);
+
+    Education education = educationRepository
+            .findByIdAndStudent(educationId, student)
+            .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Education not found"));
+
+    return educationDocumentRepository.findByEducation(education)
+            .stream()
+            .map(doc -> EducationDocumentResponse.builder()
+                    .id(doc.getId())
+                    .documentType(doc.getDocumentType().name())
+                    .fileUrl(doc.getFileUrl())
+                    .build())
+            .toList();
+}
+@Override
+@Transactional
+public void deleteDocument(String email, Long educationId, Long documentId) {
+
+    Student student = getStudentByEmail(email);
+
+    Education education = educationRepository
+            .findByIdAndStudent(educationId, student)
+            .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Education not found"));
+
+    EducationDocument document = educationDocumentRepository
+            .findByIdAndEducation(documentId, education)
+            .orElseThrow(() -> new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Document not found"));
+
+    educationDocumentRepository.delete(document);
+}
        
 }

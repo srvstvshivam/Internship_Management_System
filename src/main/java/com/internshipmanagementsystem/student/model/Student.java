@@ -35,11 +35,29 @@ public class Student {
     @Column(unique = true)
     private String enrollmentNumber;
 
-    @Embedded
-    private Address address;
+  @Embedded
+@AttributeOverrides({
+        @AttributeOverride(name = "street", column = @Column(name = "permanent_street")),
+        @AttributeOverride(name = "city", column = @Column(name = "permanent_city")),
+        @AttributeOverride(name = "state", column = @Column(name = "permanent_state")),
+        @AttributeOverride(name = "country", column = @Column(name = "permanent_country")),
+        @AttributeOverride(name = "pincode", column = @Column(name = "permanent_pincode"))
+})
+private Address permanentAddress;
+
+
+@Embedded
+@AttributeOverrides({
+        @AttributeOverride(name = "street", column = @Column(name = "correspondence_street")),
+        @AttributeOverride(name = "city", column = @Column(name = "correspondence_city")),
+        @AttributeOverride(name = "state", column = @Column(name = "correspondence_state")),
+        @AttributeOverride(name = "country", column = @Column(name = "correspondence_country")),
+        @AttributeOverride(name = "pincode", column = @Column(name = "correspondence_pincode"))
+})
+private Address correspondenceAddress;
 
     @OneToOne
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Builder.Default
@@ -60,15 +78,21 @@ public class Student {
         updatedAt = LocalDateTime.now();
     }
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Education> educations;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Project> projects;
 
-    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private StudentProfile profile;
+    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private StudentLinksResume profile;
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WorkExperience> workExperiences;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProfileSkillLanguage> skillsLanguages;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Certification> certifications;
 }

@@ -3,7 +3,6 @@ package com.internshipmanagementsystem.student.dto;
 import lombok.Data;
 import java.time.LocalDate;
 
-import com.internshipmanagementsystem.student.model.Address;
 import com.internshipmanagementsystem.student.model.enums.Gender;
 
 @Data
@@ -15,5 +14,7 @@ public class UpdateProfileRequest {
     private LocalDate dob;
     private Gender gender;
     private String mobileNumber;
-    private Address address;
+
+    private AddressRequest permanentAddress;
+    private AddressRequest correspondenceAddress;
 }

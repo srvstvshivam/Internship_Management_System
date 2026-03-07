@@ -3,15 +3,13 @@ package com.internshipmanagementsystem.student.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-
-
 @Entity
-@Table(name = "student_profiles")
+@Table(name = "student_links_resume")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StudentProfile {
+public class StudentLinksResume {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,13 +17,14 @@ public class StudentProfile {
 
     private String resumeUrl;
 
-    private String skills;//arr 
-
     private String linkedinUrl;
     private String githubUrl;
     private String portfolioUrl;
 
-    @OneToOne
-    @JoinColumn(name = "student_id")
-    private Student student;
+    @Column(length = 1500)
+    private String profileSummary;
+
+   @OneToOne
+@JoinColumn(name = "student_id", unique = true)
+private Student student;
 }
