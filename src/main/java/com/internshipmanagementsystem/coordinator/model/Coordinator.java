@@ -23,7 +23,7 @@ public class Coordinator {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Personal Information
+ 
     @Column(nullable = false)
     private String firstName;
 
@@ -37,7 +37,7 @@ public class Coordinator {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    // Contact Information
+  
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -46,7 +46,7 @@ public class Coordinator {
     @Column(columnDefinition = "TEXT")
     private String address;
 
-    // Authentication
+
     @Column(nullable = false)
     private String password;
 
@@ -54,24 +54,23 @@ public class Coordinator {
     @Column(nullable = false)
     private Role role;
 
-    // Professional Details
+   
     private String designation;
     private Integer totalWorkExperienceInYears;
 
-    // Profile
     private String profileImageUrl;
 
-    // Status
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CoordinatorStatus status = CoordinatorStatus.ACTIVE;
 
-    // Relationships
+    
     @OneToMany(mappedBy = "coordinator", fetch = FetchType.LAZY)
     private List<Internship> internships;
 
-    // Audit
+    
+    
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

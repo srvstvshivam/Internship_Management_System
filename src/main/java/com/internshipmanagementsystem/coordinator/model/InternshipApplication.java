@@ -27,9 +27,7 @@ public class InternshipApplication {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // =========================
-    // RELATIONS
-    // =========================
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
@@ -39,17 +37,13 @@ public class InternshipApplication {
     @JoinColumn(name = "internship_id", nullable = false)
     private Internship internship;
 
-    // =========================
-    // APPLICATION STATUS
-    // =========================
+
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ApplicationStatus status;
 
-    // =========================
-    // TRACKING
-    // =========================
+
 
     private LocalDateTime appliedAt;
 
@@ -57,10 +51,7 @@ public class InternshipApplication {
 
     private String coordinatorRemarks;
 
-    // =========================
-    // AUTO TIMESTAMP
-    // =========================
-
+  
     @PrePersist
     public void onApply() {
         this.appliedAt = LocalDateTime.now();
